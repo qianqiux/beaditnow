@@ -208,7 +208,8 @@ if (typeof window.exportCSV === "undefined") {
   }
 
   function renderPreview(vd) {
-    var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600) / Math.max(vd.width, vd.height)));
+    var maxDim = window.innerWidth <= 500 ? pixelCanvasWrapper.clientWidth * 1.33 : Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600);
+    var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(maxDim / Math.max(vd.width, vd.height)));
     var canvas = renderPixelCanvas(vd, scale, true);
     canvas.id = "pixelCanvas";
     canvas.style.position = "absolute";
@@ -291,15 +292,6 @@ if (typeof window.exportCSV === "undefined") {
     }
     function onStart(e) {
       if (e.button === 2) return;
-      // 2-finger touch -> pan on mobile
-      if (e.touches && e.touches.length >= 2) {
-        e.preventDefault();
-        isPanning = true;
-        panStartX = e.touches[0].clientX - panOffsetX;
-        panStartY = e.touches[0].clientY - panOffsetY;
-        pixelCanvasWrapper.classList.add("panning");
-        return;
-      }
       if (isSpaceDown) {
         e.preventDefault();
         isPanning = true;
@@ -310,6 +302,15 @@ if (typeof window.exportCSV === "undefined") {
       }
       e.preventDefault();
       var coord = getPixel(e); if (!coord) return;
+      // 2-finger touch -> pan on mobile (after getPixel check but before undo)
+      if (e.touches && e.touches.length >= 2) {
+        isPanning = true;
+        panStartX = e.touches[0].clientX - panOffsetX;
+        panStartY = e.touches[0].clientY - panOffsetY;
+        pixelCanvasWrapper.classList.add("panning");
+        isDrawing = false;
+        return;
+      }
       undoStack.push({ data: cloneImageData(editImageData) });
       if (undoStack.length > 30) undoStack.shift();
       if (currentTool === "fill") {

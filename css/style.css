@@ -259,6 +259,7 @@ body {
 
 /* ===== Pixel Canvas ===== */
 .pixel-canvas-wrapper {
+  touch-action: none;
   background: #1a1a24;
   border-radius: var(--radius-sm);
   overflow: hidden;
