@@ -291,6 +291,15 @@ if (typeof window.exportCSV === "undefined") {
     }
     function onStart(e) {
       if (e.button === 2) return;
+      // 2-finger touch -> pan on mobile
+      if (e.touches && e.touches.length >= 2) {
+        e.preventDefault();
+        isPanning = true;
+        panStartX = e.touches[0].clientX - panOffsetX;
+        panStartY = e.touches[0].clientY - panOffsetY;
+        pixelCanvasWrapper.classList.add("panning");
+        return;
+      }
       if (isSpaceDown) {
         e.preventDefault();
         isPanning = true;
@@ -313,8 +322,10 @@ if (typeof window.exportCSV === "undefined") {
     function onMove(e) {
       if (isPanning) {
         e.preventDefault();
-        panOffsetX = e.clientX - panStartX;
-        panOffsetY = e.clientY - panStartY;
+        var cx = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+        var cy = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+        panOffsetX = cx - panStartX;
+        panOffsetY = cy - panStartY;
         var cnv = pixelCanvasWrapper.querySelector("canvas");
         if (cnv) { cnv.style.left = (centerX + panOffsetX) + "px"; cnv.style.top = (centerY + panOffsetY) + "px"; }
         return;
@@ -425,19 +436,26 @@ var _touchY = 0;
 document.addEventListener("touchstart", function(e) { _touchY = e.touches[0].clientY; }, { passive: true });
 document.addEventListener("touchend", function(e) {
   if (_pageAnim) return;
-  // Upload page: no touch navigation
-  if (_pageIdx === 0) return;
-  // Editor page: never switch pages via touch
-  return;
-  var dy = _touchY - e.changedTouches[0].clientY;
-  if (Math.abs(dy) < 30) return;
-  var next = _pageIdx + (dy > 0 ? 1 : -1);
-  if (next < 0 || next > 1) return;
-  _pageAnim = true;
-  _pageIdx = next;
-  var stack = document.getElementById("pageStack");
-  if (stack) stack.classList.toggle("at-editor", next === 1);
-  setTimeout(function() { _pageAnim = false; }, 500);
+  // Only enable touch page switching on mobile (<=500px)
+  if (window.innerWidth > 500) return;
+  // Upload page: swipe down -> editor
+  if (_pageIdx === 0) {
+    var dy = _touchY - e.changedTouches[0].clientY;
+    if (dy > 30) {
+      switchToPage(1);
+    }
+    return;
+  }
+  // Editor page: swipe up at top -> upload
+  if (_pageIdx === 1) {
+    var pe = document.getElementById("pageEditor");
+    if (pe && pe.scrollTop > 0) return;
+    var dy = _touchY - e.changedTouches[0].clientY;
+    if (dy < -30) {
+      switchToPage(0);
+    }
+    return;
+  }
 }, { passive: true });
 
 function switchToPage(idx) {
