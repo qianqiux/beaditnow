@@ -6,20 +6,35 @@
  * 尝试用 Web Share API 分享文件（手机端），失败则回到下载
  */
 function tryShareOrDownload(blob, fileName, mimeType) {
-  var file = new File([blob], fileName, { type: mimeType });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({ files: [file], title: fileName }).catch(function(){});
-    return true;
+  // Mobile: try Web Share API for files
+  if (navigator.share) {
+    var file = new File([blob], fileName, { type: mimeType });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: fileName }).catch(function(){
+        // Share cancelled or failed - try download
+        fallbackDownload(blob, fileName);
+      });
+      return;
+    }
+    // Share without files (some browsers support this)
+    navigator.share({ title: fileName }).catch(function(){
+      fallbackDownload(blob, fileName);
+    });
+    return;
   }
-  // Fallback: create download link
+  // Desktop: download directly
+  fallbackDownload(blob, fileName);
+}
+
+function fallbackDownload(blob, fileName) {
+  var url = URL.createObjectURL(blob);
   var link = document.createElement("a");
   link.download = fileName;
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  setTimeout(function() { URL.revokeObjectURL(link.href); }, 1000);
-  return false;
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
 
 /**

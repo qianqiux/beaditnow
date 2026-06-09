@@ -766,8 +766,9 @@ body {
 
   .btn-primary { font-size: 0.85rem; padding: 10px 16px; }
 
-  /* Editor page: flex column, sections stack naturally */
-  .result-area { display: flex !important; flex-direction: column; gap: 8px; }
+  /* Editor page: auto height so border wraps all content */
+  .module-editor { flex: 0 0 auto; height: auto; }
+  .result-area { display: flex !important; flex-direction: column; gap: 8px; flex: 0 0 auto; height: auto; }
   .result-area .result-section { flex: 0 0 auto !important; min-height: 0; padding: 0; overflow: visible; }
   .result-area .result-section:first-child { display: flex; flex-direction: column; }
   .result-area .result-section:first-child .canvas-with-palette { display: flex; flex-direction: column; flex: 1; }
