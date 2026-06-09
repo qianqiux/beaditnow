@@ -472,7 +472,18 @@ document.addEventListener("wheel", function(e) {
     }
     // Don't switch pages when scrolling inside content area
     var ra = document.getElementById("resultArea");
-    if (ra && ra.contains(e.target)) return;
+    if (ra && ra.contains(e.target)) {
+      // On mobile: scrolling up at top of page → go back to upload
+      if (e.deltaY < 0 && window.innerWidth <= 500) {
+        var pe = document.getElementById("pageEditor");
+        if (pe && pe.scrollTop <= 0) {
+          e.preventDefault();
+          if (!_pageAnim) { _pageAnim = true; _pageIdx = 0; var s = document.getElementById("pageStack"); if (s) s.classList.toggle("at-editor", false); setTimeout(function() { _pageAnim = false; }, 500); }
+          return;
+        }
+      }
+      return;
+    }
     // Outside content area → switch back to upload
     if (!_pageAnim) {
       _pageAnim = true;
