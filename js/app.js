@@ -208,8 +208,7 @@ if (typeof window.exportCSV === "undefined") {
   }
 
   function renderPreview(vd) {
-    var maxDim = window.innerWidth <= 500 ? pixelCanvasWrapper.clientWidth * 2.5 : Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600);
-    var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(maxDim / Math.max(vd.width, vd.height)));
+    var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600) / Math.max(vd.width, vd.height)));
     var canvas = renderPixelCanvas(vd, scale, true);
     canvas.id = "pixelCanvas";
     canvas.style.position = "absolute";

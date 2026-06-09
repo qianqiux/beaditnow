@@ -766,17 +766,17 @@ body {
 
   .btn-primary { font-size: 0.85rem; padding: 10px 16px; }
 
-  /* Editor page: block layout, fully scrollable, no height limits */
+  /* Editor page: canvas viewport takes most of the screen */
   .result-area { display: block !important; }
   .result-area .result-section { flex: none !important; min-height: 0; }
   .result-area .result-section:first-child { display: block; }
   .result-area .result-section:first-child .canvas-with-palette { display: block; }
   
   .canvas-with-palette { display: block; }
-  .palette-sidebar { width: 100%; max-height: 160px; }
+  .palette-sidebar { width: 100%; max-height: 100px; }
   .palette-sidebar .bead-palette { grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 4px; }
   .canvas-main { display: block; }
-  .canvas-main .pixel-canvas-wrapper { min-height: 200px; }
+  .canvas-main .pixel-canvas-wrapper { height: 55vh; min-height: 250px; }
   
   .result-area .result-section { padding: 0; margin-bottom: 8px; }
   .result-area .result-section:last-child { margin-bottom: 0; }
@@ -810,7 +810,6 @@ body {
   
   .tool-group { gap: 2px; }
   .tool-divider { margin: 0 2px; }
-  .pixel-canvas-wrapper canvas { image-rendering: crisp-edges; image-rendering: pixelated; }
 }/* ===== 小平板端优化 (500px - 800px) ===== */
 @media (min-width: 501px) and (max-width: 800px) {
   .app { padding: 0 14px; }
