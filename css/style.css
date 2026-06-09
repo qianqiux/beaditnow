@@ -776,9 +776,9 @@ body {
   .palette-sidebar { width: 100%; max-height: 100px; }
   .palette-sidebar .bead-palette { grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 4px; }
   .canvas-main { display: block; }
-  .canvas-main .pixel-canvas-wrapper { height: 55vh; min-height: 250px; }
+  .canvas-main .pixel-canvas-wrapper { height: 45vh; min-height: 200px; }
   
-  .result-area .result-section { padding: 0; margin-bottom: 8px; }
+  .result-area .result-section { padding: 0; margin-bottom: 12px; overflow: visible; }
   .result-area .result-section:last-child { margin-bottom: 0; }
   
   .result-section:nth-child(2) .palette { gap: 3px; }
