@@ -208,7 +208,7 @@ if (typeof window.exportCSV === "undefined") {
   }
 
   function renderPreview(vd) {
-    var maxDim = window.innerWidth <= 500 ? pixelCanvasWrapper.clientWidth * 1.33 : Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600);
+    var maxDim = window.innerWidth <= 500 ? pixelCanvasWrapper.clientWidth * 2.5 : Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600);
     var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(maxDim / Math.max(vd.width, vd.height)));
     var canvas = renderPixelCanvas(vd, scale, true);
     canvas.id = "pixelCanvas";
@@ -352,6 +352,31 @@ if (typeof window.exportCSV === "undefined") {
     canvas.addEventListener("mousemove", function(e) { var c = getPixel(e); if (c) setStatusPos(c.px, c.py); });
     canvas.addEventListener("mouseleave", function() { clearStatusPos(); });
     canvas.addEventListener("touchcancel", onEnd);
+    // Wrapper-level 2-finger pan for mobile (catches fingers on different elements)
+    pixelCanvasWrapper.addEventListener("touchstart", function pe(e) {
+      if (e.touches.length >= 2) {
+        e.preventDefault();
+        isPanning = true;
+        panStartX = e.touches[0].clientX - panOffsetX;
+        panStartY = e.touches[0].clientY - panOffsetY;
+        pixelCanvasWrapper.classList.add("panning");
+      }
+    }, { passive: false });
+    pixelCanvasWrapper.addEventListener("touchmove", function pe(e) {
+      if (isPanning) {
+        e.preventDefault();
+        panOffsetX = e.touches[0].clientX - panStartX;
+        panOffsetY = e.touches[0].clientY - panStartY;
+        var cnv = pixelCanvasWrapper.querySelector("canvas");
+        if (cnv) { cnv.style.left = (centerX + panOffsetX) + "px"; cnv.style.top = (centerY + panOffsetY) + "px"; }
+      }
+    }, { passive: false });
+    pixelCanvasWrapper.addEventListener("touchend", function pe(e) {
+      if (isPanning && e.touches.length < 2) {
+        isPanning = false;
+        pixelCanvasWrapper.classList.remove("panning");
+      }
+    });
   }
 
   undoBtn.addEventListener("click", function() {
