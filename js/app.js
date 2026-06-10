@@ -343,6 +343,15 @@ if (typeof window.exportCSV === "undefined") {
       return true;
     }    function onStart(e) {
       if (e.button === 2) return;
+      // Middle mouse button or Space + left drag = pan
+      if (e.button === 1) {
+        e.preventDefault();
+        isPanning = true;
+        panStartX = e.clientX - panOffsetX;
+        panStartY = e.clientY - panOffsetY;
+        pixelCanvasWrapper.classList.add("panning");
+        return;
+      }
       if (isSpaceDown) {
         e.preventDefault();
         isPanning = true;
