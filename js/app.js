@@ -9,7 +9,7 @@ if (typeof window.exportCSV === "undefined") {
   window.exportCSV = function(cm,t) { var csv="\ufeff颜色名称,豆子编号,R,G,B,所需数量\n";for(var i=0;i<cm.length;i++){var e=cm[i];csv+=e.bead.name+",#"+e.bead.id+","+e.bead.r+","+e.bead.g+","+e.bead.b+","+e.count+"\n";}var b=new Blob([csv],{type:"text/csv;charset=utf-8"});var a=document.createElement("a");a.download="bead-list.csv";a.href=URL.createObjectURL(b);a.click();URL.revokeObjectURL(a.href); };
 }
 
-(function() {
+void function() {
   "use strict";
   const $ = function(id) { return document.getElementById(id); };
 
@@ -180,7 +180,8 @@ if (typeof window.exportCSV === "undefined") {
       var refined = kmeansRefine(scaled, q.palette, 5);
       editImageData = cloneImageData(mapColors(scaled, refined));
       undoStack = [{ data: cloneImageData(editImageData) }];
-}
+
+
       var ct = getColorTable(currentBrand);
       var firstBead = findNearestBeadColor({ r: editImageData.data[0], g: editImageData.data[1], b: editImageData.data[2] }, ct);
       selectedBeadColor = { id: firstBead.id, name: firstBead.name, r: firstBead.r, g: firstBead.g, b: firstBead.b };
@@ -549,23 +550,5 @@ document.addEventListener("wheel", function(e) {
   window._cloneImageData = function(v) { return cloneImageData(v); };
   window._renderAll = function() { renderAll(); };
   window._switchToPage = function(i) { switchToPage(i); };
-)();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}();

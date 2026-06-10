@@ -11,11 +11,7 @@
     <header class="app-header" style="display:flex;align-items:center;justify-content:space-between">
       <h1 style="margin:0">BeadItNow</h1>
       <div class="header-actions">
-        <button class="btn btn-sm btn-ghost" id="saveBtn" style="display:none" onclick="showSaveDialog()">💾 保存</button>
-        <button class="btn btn-sm btn-ghost" id="loadBtn" style="display:none" onclick="showLoadDialog()">📂 加载</button>
-        <button class="btn btn-sm btn-ghost" id="loginBtn" onclick="showLoginModal()">👤 登录</button>
-        <span id="userStatus"></span>
-      </div>
+        </div>
     </header>
 
     <div class="page-stack" id="pageStack">
@@ -147,14 +143,11 @@
     </div>
   </div>
 
-  <script defer src="js/color-table.js"></script>
-  <script defer src="js/image-processor.js"></script>
-  <script defer src="js/perler-mapper.js"></script>
-  <script defer src="js/exporter.js"></script>
-  <script defer src="js/app.js"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script defer src="js/user.js"></script>
+  <script src="js/color-table.js"></script>
+  <script src="js/image-processor.js"></script>
+  <script src="js/perler-mapper.js"></script>
+  <script src="js/exporter.js"></script>
+  <script src="js/app.js"></script>
   <div class="modal-overlay" id="loginModal" style="display:none" onclick="if(event.target===this)closeLoginModal()">
     <div class="modal-box">
       <div class="modal-header"><h2 id="authTitle">登录</h2><button class="btn btn-sm btn-ghost" onclick="closeLoginModal()">✕</button></div>
