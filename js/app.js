@@ -531,6 +531,13 @@ document.addEventListener("wheel", function(e) {
   }
 }, { passive: false });
 
+  window._app = {};
+  Object.defineProperty(window._app, "editImageData", { get: function() { return editImageData; }, set: function(v) { editImageData = v; } });
+  Object.defineProperty(window._app, "currentBrand", { get: function() { return currentBrand; }, set: function(v) { currentBrand = v; } });
+  Object.defineProperty(window._app, "undoStack", { get: function() { return undoStack; }, set: function(v) { undoStack = v; } });
+  window._cloneImageData = function(v) { return cloneImageData(v); };
+  window._renderAll = function() { renderAll(); };
+  window._switchToPage = function(i) { switchToPage(i); };
 })();
 
 
