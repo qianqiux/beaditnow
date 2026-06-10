@@ -588,6 +588,25 @@ function getColorTable(brand) {
     return result;
   }
 
+    if (brand === "perler") {
+    var perlerColors = [["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined]];
+    var seen = {}, result = [];
+    for (var i = 0; i < perlerColors.length; i++) {
+      var c = perlerColors[i], key = c[2] + "," + c[3] + "," + c[4];
+      if (!seen[key]) { seen[key] = true; result.push({id:c[0], name:c[1], r:c[2], g:c[3], b:c[4]}); }
+    }
+    return result;
+  }
+  if (brand === "hama") {
+    var hamaColors = [["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined],["undefined","undefined",undefined,undefined,undefined]];
+    var seen = {}, result = [];
+    for (var i = 0; i < hamaColors.length; i++) {
+      var c = hamaColors[i], key = c[2] + "," + c[3] + "," + c[4];
+      if (!seen[key]) { seen[key] = true; result.push({id:c[0], name:c[1], r:c[2], g:c[3], b:c[4]}); }
+    }
+    return result;
+  }
+
   // 默认：组合调色板 (Perler + Hama + Artkal + 补充色)
     return COMBINED_COLORS.slice();
 }
