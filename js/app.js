@@ -1,4 +1,4 @@
-﻿// Fallback export functions
+// Fallback export functions
 if (typeof window.exportPNG === "undefined") {
   window.exportPNG = function(d) { var c=document.createElement("canvas");c.width=d.width;c.height=d.height;c.getContext("2d").putImageData(d,0,0);var a=document.createElement("a");a.download="pixel-art.png";a.href=c.toDataURL("image/png");a.click(); };
 }
