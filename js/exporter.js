@@ -48,6 +48,15 @@ function exportPNG(pixelData) {
   var ctx = canvas.getContext("2d");
   ctx.putImageData(pixelData, 0, 0);
   
+  var ctx2 = canvas.getContext("2d");
+  ctx2.globalAlpha = 0.3;
+  ctx2.fillStyle = "#666";
+  ctx2.font = Math.max(10, Math.min(canvas.width * 0.02, 20)) + "px Arial";
+  ctx2.textAlign = "right";
+  ctx2.textBaseline = "bottom";
+  ctx2.fillText("BeadItNow", canvas.width - 4, canvas.height - 2);
+  ctx2.globalAlpha = 1;
+  
   canvas.toBlob(function(blob) {
     tryShareOrDownload(blob, "pixel-art.png", "image/png");
   }, "image/png");
@@ -162,6 +171,12 @@ function exportPDF(pixelData, colorMap, brand) {
   }
   
   // Use share on mobile, save on desktop
+  pdf.setFontSize(6);
+  pdf.setTextColor(180);
+  try { pdf.setGState(new (window.jspdf.GState)({opacity: 0.3})); } catch(_){}
+  pdf.text("BeadItNow", pageW - margin, pageH - margin, { align: "right" });
+  try { pdf.setGState(new (window.jspdf.GState)({opacity: 1})); } catch(_){}
+  
   var pdfBlob = pdf.output("blob");
   tryShareOrDownload(pdfBlob, "perler-beads-chart.pdf", "application/pdf");
 }
