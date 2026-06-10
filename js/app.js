@@ -180,6 +180,26 @@ if (typeof window.exportCSV === "undefined") {
       var refined = kmeansRefine(scaled, q.palette, 5);
       editImageData = cloneImageData(mapColors(scaled, refined));
       undoStack = [{ data: cloneImageData(editImageData) }];
+      // Ensure minimum canvas size for free-form grid editing
+      var minSize = Math.max(64, editImageData.width, editImageData.height);
+      if (editImageData.width < minSize || editImageData.height < minSize) {
+        var oldW = editImageData.width, oldH = editImageData.height;
+        var newW = Math.max(oldW, minSize), newH = Math.max(oldH, minSize);
+        var expanded = new ImageData(newW, newH);
+        var xOff = Math.floor((newW - oldW) / 2);
+        var yOff = Math.floor((newH - oldH) / 2);
+        for (var y = 0; y < oldH; y++) {
+          for (var x = 0; x < oldW; x++) {
+            var oi = (y * oldW + x) * 4;
+            var ni = ((y + yOff) * newW + (x + xOff)) * 4;
+            expanded.data[ni] = editImageData.data[oi];
+            expanded.data[ni+1] = editImageData.data[oi+1];
+            expanded.data[ni+2] = editImageData.data[oi+2];
+          }
+        }
+        editImageData = expanded;
+        undoStack = [{ data: cloneImageData(editImageData) }];
+      }
       var ct = getColorTable(currentBrand);
       var firstBead = findNearestBeadColor({ r: editImageData.data[0], g: editImageData.data[1], b: editImageData.data[2] }, ct);
       selectedBeadColor = { id: firstBead.id, name: firstBead.name, r: firstBead.r, g: firstBead.g, b: firstBead.b };
@@ -199,6 +219,31 @@ if (typeof window.exportCSV === "undefined") {
     finally { bt.classList.remove("hidden"); bl.classList.add("hidden"); generateBtn.disabled = false; }
   }
 
+
+  // Expand editImageData when drawing at edges (free-form canvas)
+  function expandEditImageData(direction) {
+    var w = editImageData.width, h = editImageData.height;
+    var EXT = 8, newW = w, newH = h, xOff = 0, yOff = 0;
+    if (direction === 'left') { newW += EXT; xOff = EXT; }
+    else if (direction === 'right') { newW += EXT; }
+    else if (direction === 'top') { newH += EXT; yOff = EXT; }
+    else if (direction === 'bottom') { newH += EXT; }
+    var newData = new ImageData(newW, newH);
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        var oi = (y * w + x) * 4;
+        var ni = ((y + yOff) * newW + (x + xOff)) * 4;
+        newData.data[ni] = editImageData.data[oi];
+        newData.data[ni+1] = editImageData.data[oi+1];
+        newData.data[ni+2] = editImageData.data[oi+2];
+        newData.data[ni+3] = editImageData.data[oi+3];
+      }
+    }
+    editImageData = newData;
+    setStatusCanvas(newW, newH);
+    var ci = document.getElementById('canvasInfo');
+    if (ci) ci.textContent = newW + ' x ' + newH + ' \u50CF\u7D20';
+  }
   function renderAll() {
     var vd = getViewData(); if (!vd) return;
     renderPreview(vd); renderUsedPalette(vd); renderBeadPalette(); updateColorIndicator();
@@ -283,14 +328,20 @@ if (typeof window.exportCSV === "undefined") {
     }
     function paintPixel(px, py) {
       if (!editImageData) return false;
+      var w = editImageData.width, h = editImageData.height;
+      // Auto-expand canvas if drawing at edges
+      if (px === 0) { expandEditImageData("left"); px = 8; w = editImageData.width; }
+      else if (px >= w - 1) { expandEditImageData("right"); w = editImageData.width; }
+      if (py === 0) { expandEditImageData("top"); py = 8; h = editImageData.height; }
+      else if (py >= h - 1) { expandEditImageData("bottom"); h = editImageData.height; }
       var idx = (py * w + px) * 4;
       var tr = 255, tg = 255, tb = 255;
       if (currentTool !== "eraser" && selectedBeadColor) { tr = selectedBeadColor.r; tg = selectedBeadColor.g; tb = selectedBeadColor.b; }
       if (editImageData.data[idx] === tr && editImageData.data[idx+1] === tg && editImageData.data[idx+2] === tb) return false;
       editImageData.data[idx] = tr; editImageData.data[idx+1] = tg; editImageData.data[idx+2] = tb; editImageData.data[idx+3] = 255;
+      setStatusCanvas(w, h);
       return true;
-    }
-    function onStart(e) {
+    }    function onStart(e) {
       if (e.button === 2) return;
       if (isSpaceDown) {
         e.preventDefault();
