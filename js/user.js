@@ -23,7 +23,7 @@ async function restoreSession() {
 }
 
 async function signUp(email, password) {
-  if (!supabaseClient) { showToast('请先登录Supabase'); return; }
+  if (!supabaseClient) { showToast('请先初始化Supabase'); return; }
   var r = await supabaseClient.auth.signUp({ email: email, password: password });
   if (r.error) { showToast(r.error.message); return null; }
   showToast('注册成功！请检查邮箱确认');
@@ -32,7 +32,7 @@ async function signUp(email, password) {
 }
 
 async function signIn(email, password) {
-  if (!supabaseClient) { showToast('请先登录Supabase'); return; }
+  if (!supabaseClient) { showToast('请先初始化Supabase'); return; }
   var r = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
   if (r.error) { showToast(r.error.message); return null; }
   currentUser = r.data.user; updateUserUI(); closeLoginModal(); loadUserProjects();
@@ -94,19 +94,20 @@ async function deleteProject(pid) {
 }
 
 function updateUserUI() {
-  var el = document.getElementById('userStatus');
-  if (!el) return;
+  var sb = document.getElementById('saveBtn');
+  var lb = document.getElementById('loadBtn');
+  var lg = document.getElementById('loginBtn');
+  var lo = document.getElementById('logoutBtn');
   if (currentUser) {
-    var em = currentUser.email || '';
-    el.innerHTML = '<span class="user-avatar">' + em.charAt(0).toUpperCase() + '</span><span class="user-email">' + em.replace(/</g,'&lt;') + '</span><button class="btn btn-sm btn-ghost" onclick="signOut()">退出</button>';
-    var sb = document.getElementById('saveBtn'); if (sb) sb.style.display = '';
-    var lb = document.getElementById('loadBtn'); if (lb) lb.style.display = '';
-    var lg = document.getElementById('loginBtn'); if (lg) lg.style.display = 'none';
+    if (lg) lg.style.display = 'none';
+    if (lo) lo.style.display = '';
+    if (sb) sb.style.display = '';
+    if (lb) lb.style.display = '';
   } else {
-    el.innerHTML = '';
-    var sb = document.getElementById('saveBtn'); if (sb) sb.style.display = 'none';
-    var lb = document.getElementById('loadBtn'); if (lb) lb.style.display = 'none';
-    var lg = document.getElementById('loginBtn'); if (lg) lg.style.display = '';
+    if (lg) lg.style.display = '';
+    if (lo) lo.style.display = 'none';
+    if (sb) sb.style.display = 'none';
+    if (lb) lb.style.display = 'none';
   }
 }
 
@@ -117,7 +118,7 @@ function updateProjectsUI() {
   var h = '';
   for (var i = 0; i < userProjects.length; i++) {
     var p = userProjects[i];
-    h += '<div class="project-item" onclick="loadProjectToEditor(' + p.id + ')"><div class="project-info"><span class="project-name">' + (p.name||'').replace(/</g,'&lt;') + '</span><span class="project-meta">' + p.pixel_width + 'x' + p.pixel_height + ' | ' + (p.brand || '') + '</span></div><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();deleteProject(' + p.id + ')">\u2715</button></div>';
+    h += '<div class="project-item" onclick="loadProjectToEditor(' + p.id + ')"><div class="project-info"><span class="project-name">' + (p.name||'').replace(/</g,'&lt;') + '</span><span class="project-meta">' + p.pixel_width + 'x' + p.pixel_height + ' | ' + (p.brand || '') + '</span></div><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();deleteProject(' + p.id + ')">✕</button></div>';
   }
   el.innerHTML = h;
 }
@@ -128,9 +129,9 @@ function closeLoginModal() { var m = document.getElementById('loginModal'); if (
 var _authMode = 'login';
 function toggleAuthMode() {
   _authMode = _authMode === 'login' ? 'signup' : 'login';
-  document.getElementById('authSubmitBtn').textContent = _authMode === 'login' ? '\u767B\u5F55' : '\u6CE8\u518C';
-  document.getElementById('authTitle').textContent = _authMode === 'login' ? '\u767B\u5F55' : '\u6CE8\u518C\u8D26\u53F7';
-  document.getElementById('authToggle').innerHTML = _authMode === 'login' ? '\u6CA1\u6709\u8D26\u53F7\uFF1F<a href="#" onclick="toggleAuthMode();return false">\u6CE8\u518C</a>' : '\u5DF2\u6709\u8D26\u53F7\uFF1F<a href="#" onclick="toggleAuthMode();return false">\u767B\u5F55</a>';
+  document.getElementById('authSubmitBtn').textContent = _authMode === 'login' ? '登录' : '注册';
+  document.getElementById('authTitle').textContent = _authMode === 'login' ? '登录' : '注册账号';
+  document.getElementById('authToggle').innerHTML = _authMode === 'login' ? '没有账号？<a href="#" onclick="toggleAuthMode();return false">注册</a>' : '已有账号？<a href="#" onclick="toggleAuthMode();return false">登录</a>';
 }
 
 async function submitAuth() {
