@@ -139,7 +139,8 @@ async function loadProjectToEditor(pid) {
 
 async function deleteProject(pid) {
   if (!currentUser) return;
-  if (!confirm('确定删除？')) return;
+  var ok = await showDeleteConfirmAsync();
+  if (!ok) return;
   var token = localStorage.getItem('sb-access-token');
   try {
     var r = await fetch(SUPABASE_URL + '/rest/v1/projects?id=eq.' + pid, {
@@ -242,6 +243,25 @@ function showToast(msg) {
   if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; document.body.appendChild(el); }
   el.textContent = msg; el.classList.add('show');
   clearTimeout(el._timer); el._timer = setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+var _delResolve = null;
+function showDeleteConfirmAsync() {
+  return new Promise(function(r) {
+    _delResolve = r;
+    var m = document.getElementById('deleteModal');
+    if (m) m.style.display = 'flex'; else r(false);
+  });
+}
+function confirmDeleteYes() {
+  var m = document.getElementById('deleteModal');
+  if (m) m.style.display = 'none';
+  if (_delResolve) { _delResolve(true); _delResolve = null; }
+}
+function confirmDeleteNo() {
+  var m = document.getElementById('deleteModal');
+  if (m) m.style.display = 'none';
+  if (_delResolve) { _delResolve(false); _delResolve = null; }
 }
 
 // Auto-restore session

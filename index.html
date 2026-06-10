@@ -184,6 +184,18 @@
       </div>
     </div>
   </div>
+  <div class="modal-overlay" id="deleteModal" style="display:none" onclick="if(event.target===this)confirmDeleteNo()">
+    <div class="modal-box" style="width:320px">
+      <div class="modal-header"><h2>确认删除</h2><button class="btn btn-sm btn-ghost" onclick="confirmDeleteNo()">✕</button></div>
+      <div class="modal-body">
+        <p style="margin:0 0 16px;color:var(--text2);font-size:0.9rem">确定要删除这个作品吗？此操作不可撤销。</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="confirmDeleteNo()" style="flex:1;padding:10px 20px;border:none">取消</button>
+          <button class="btn btn-primary" onclick="confirmDeleteYes()" style="flex:1;padding:10px 20px;font-size:0.88rem;background:#e55;border-color:#e55;width:auto;margin-top:0">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 
