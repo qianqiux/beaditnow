@@ -370,21 +370,13 @@ void function() {
     canvas.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onEnd);
     // ---- 手机触控：单指拖拽 = 平移画布，点击 = 画像素，双指捏合 = 缩放 ----
-    var _tx=0,_ty=0,_tm=false,_pd=0;
+    var _tx=0,_ty=0,_tm=false;
     canvas.addEventListener("touchstart", function(e) {
-      if (e.touches.length >= 2) {
-        _pd = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        isPanning = false; return;
-      }
+      if (e.touches.length >= 2) return;
       _tx=e.touches[0].clientX; _ty=e.touches[0].clientY; _tm=false;
     }, { passive: true });
     canvas.addEventListener("touchmove", function(e) {
-      if (e.touches.length >= 2) {
-        e.preventDefault();
-        var d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-        if (_pd > 0) { if (d > _pd*1.08) zoomIn(); else if (d < _pd*0.92) zoomOut(); }
-        _pd = d; return;
-      }
+      if (e.touches.length >= 2) return;
       var cx=e.touches[0].clientX, cy=e.touches[0].clientY;
       var dx=cx-_tx, dy=cy-_ty;
       if (dx*dx+dy*dy > 16) {
