@@ -151,36 +151,36 @@ async function deleteProject(pid) {
   } catch(e) { showToast('删除失败'); }
 }
 
-function showEl(el) { if (el) { el.classList.remove('hidden'); el.style.display = ''; } }
-function hideEl(el) { if (el) { el.classList.add('hidden'); el.style.display = 'none'; } }
 function updateUserUI() {
-  var us = document.getElementById('userStatus');
-  var ud = document.getElementById('userDropdown');
-  var de = document.getElementById('dropdownEmail');
-  if (currentUser) {
-    var em = currentUser.email || '';
-    if (window.innerWidth <= 500 && us) {
+  try {
+    var us = document.getElementById('userStatus');
+    if (currentUser) {
+      var em = currentUser.email || '';
+      // 强制设为移动端模式：只显示头像
       us.innerHTML = '<span class="user-avatar" id="avatarBtn" style="cursor:pointer">' + em.charAt(0).toUpperCase() + '</span>';
-      us.classList.remove('hidden'); us.style.display = '';
+      us.style.display = '';
+      us.className = '';
+      // 隐藏所有旧按钮
+      var lg = document.getElementById('loginBtn'); if(lg){lg.style.display='none';lg.className='hidden';}
+      var lo = document.getElementById('logoutBtn'); if(lo){lo.style.display='none';lo.className='hidden';}
+      var sb = document.getElementById('saveBtn'); if(sb){sb.style.display='none';sb.className='hidden';}
+      var lb = document.getElementById('loadBtn'); if(lb){lb.style.display='none';lb.className='hidden';}
+      // 头像点击：弹出下拉
       var ab = document.getElementById('avatarBtn');
-      if (ab) { ab.onclick = function(e){ e.stopPropagation(); var d=document.getElementById('userDropdown'); if(d)d.classList.toggle('hidden'); }; }
-    } else if (us) {
-      us.innerHTML = '<span class="user-avatar">' + em.charAt(0).toUpperCase() + '</span><span class="user-email">' + em.replace(/</g,'&lt;') + '</span>';
-      us.classList.remove('hidden'); us.style.display = '';
+      if(ab) ab.onclick = function(e){ e.stopPropagation(); var d=document.getElementById('userDropdown'); if(d)d.classList.toggle('hidden'); };
+      // 更新下拉菜单内容
+      var de = document.getElementById('dropdownEmail');
+      if(de) de.textContent = em;
+    } else {
+      us.innerHTML = '';
+      us.className = 'hidden';
+      us.style.display = 'none';
+      var lg = document.getElementById('loginBtn'); if(lg){lg.style.display='';lg.className='';}
+      var lo = document.getElementById('logoutBtn'); if(lo){lo.style.display='none';lo.className='hidden';}
+      var sb = document.getElementById('saveBtn'); if(sb){sb.style.display='none';sb.className='hidden';}
+      var lb = document.getElementById('loadBtn'); if(lb){lb.style.display='none';lb.className='hidden';}
     }
-    if (de) de.textContent = em;
-    // Show/hide buttons
-    var lg = document.getElementById('loginBtn'); if (lg) { lg.classList.add('hidden'); lg.style.display = 'none'; }
-    var lo = document.getElementById('logoutBtn'); if (lo) { lo.classList.remove('hidden'); lo.style.display = ''; }
-    var sb = document.getElementById('saveBtn'); if (sb) { sb.classList.remove('hidden'); sb.style.display = ''; }
-    var lb = document.getElementById('loadBtn'); if (lb) { lb.classList.remove('hidden'); lb.style.display = ''; }
-  } else {
-    if (us) { us.innerHTML = ''; us.classList.add('hidden'); us.style.display = 'none'; }
-    var lg = document.getElementById('loginBtn'); if (lg) { lg.classList.remove('hidden'); lg.style.display = ''; }
-    var lo = document.getElementById('logoutBtn'); if (lo) { lo.classList.add('hidden'); lo.style.display = 'none'; }
-    var sb = document.getElementById('saveBtn'); if (sb) { sb.classList.add('hidden'); sb.style.display = 'none'; }
-    var lb = document.getElementById('loadBtn'); if (lb) { lb.classList.add('hidden'); lb.style.display = 'none'; }
-  }
+  } catch(e) { console.error('updateUserUI error:', e); }
 }
 
 function updateProjectsUI() {

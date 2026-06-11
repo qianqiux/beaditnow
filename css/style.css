@@ -853,3 +853,6 @@ body {
 .user-dropdown-exit{color:#e55}
 .user-dropdown-divider{height:1px;background:var(--border)}
 @media(max-width:500px){.user-dropdown-item{padding:12px 14px;font-size:0.9rem}}
+
+/* 手机端强制隐藏顶部按钮（只保留头像） */
+@media(max-width:500px){#logoutBtn,#saveBtn,#loadBtn{display:none!important}}
