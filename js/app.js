@@ -90,6 +90,12 @@ void function() {
   }
   setupSegmented(pixelWidthGroup);
   
+  var satSlider = document.getElementById("saturateSlider");
+  var satLabel = document.getElementById("saturateVal");
+  if (satSlider && satLabel) {
+    satSlider.addEventListener("input", function() { satLabel.textContent = parseFloat(this.value).toFixed(1); });
+  }
+  
 
   function getSelectedValue(g) { return parseInt(g.querySelector(".seg-btn.active").dataset.value); }
 
@@ -154,12 +160,14 @@ void function() {
       try {
         var ct = getColorTable(currentBrand);
         return reduceToTopNColors(editImageData, ct, Math.min(ct.length, maxColorsForBrand(ct)));
+        return r;
       } catch(e) { console.error("Mapping error:", e); return editImageData; }
     }
     return editImageData;
   }
 
   beadMappingToggle.addEventListener("change", function() { showBeadMapping = beadMappingToggle.checked; renderAll(); });
+  
 
   generateBtn.addEventListener("click", generatePixelArt);
 
@@ -176,6 +184,8 @@ void function() {
       currentBrand = getSelectedBrand(); // "artkal-5mm", "artkal-2.6mm", or "combined"
       var pixelH = Math.max(1, Math.round(pixelW * (originalImgData.height / originalImgData.width)));
       var scaled = scaleToPixel(originalImgData, pixelW, pixelH);
+      var satVal = parseFloat(document.getElementById("saturateSlider").value) || 1.0;
+      if (satVal > 1.0) boostSaturation(scaled, satVal);
       var q = medianCutQuantize(scaled, maxCol);
       var refined = kmeansRefine(scaled, q.palette, 5);
       editImageData = cloneImageData(mapColors(scaled, refined));

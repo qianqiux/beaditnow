@@ -705,6 +705,9 @@ body {
   color: var(--text2);
   user-select: none;
 }
+.toggle-item{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:0.82rem;color:var(--text2);padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all 0.15s}
+.toggle-item:hover{border-color:var(--accent)}
+.toggle-item input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
 .bead-map-toggle input[type="checkbox"] {
   width: 14px;
   height: 14px;

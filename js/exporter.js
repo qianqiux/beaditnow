@@ -6,23 +6,6 @@
  * 尝试用 Web Share API 分享文件（手机端），失败则回到下载
  */
 function tryShareOrDownload(blob, fileName, mimeType) {
-  // Mobile: try Web Share API for files
-  if (navigator.share) {
-    var file = new File([blob], fileName, { type: mimeType });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: fileName }).catch(function(){
-        // Share cancelled or failed - try download
-        fallbackDownload(blob, fileName);
-      });
-      return;
-    }
-    // Share without files (some browsers support this)
-    navigator.share({ title: fileName }).catch(function(){
-      fallbackDownload(blob, fileName);
-    });
-    return;
-  }
-  // Desktop: download directly
   fallbackDownload(blob, fileName);
 }
 
@@ -42,21 +25,25 @@ function fallbackDownload(blob, fileName) {
  * @param {ImageData} pixelData
  */
 function exportPNG(pixelData) {
+  var scale = Math.max(1, Math.ceil(200 / Math.max(pixelData.width, pixelData.height)));
+  var w = pixelData.width * scale, h = pixelData.height * scale;
   var canvas = document.createElement("canvas");
-  canvas.width = pixelData.width;
-  canvas.height = pixelData.height;
+  canvas.width = w;
+  canvas.height = h;
   var ctx = canvas.getContext("2d");
-  ctx.putImageData(pixelData, 0, 0);
-  
-  var ctx2 = canvas.getContext("2d");
-  ctx2.globalAlpha = 0.3;
-  ctx2.fillStyle = "#666";
-  ctx2.font = Math.max(10, Math.min(canvas.width * 0.02, 20)) + "px Arial";
-  ctx2.textAlign = "right";
-  ctx2.textBaseline = "bottom";
-  ctx2.fillText("BeadItNow", canvas.width - 4, canvas.height - 2);
-  ctx2.globalAlpha = 1;
-  
+  ctx.imageSmoothingEnabled = false;
+  var tmp = document.createElement("canvas");
+  tmp.width = pixelData.width;
+  tmp.height = pixelData.height;
+  tmp.getContext("2d").putImageData(pixelData, 0, 0);
+  ctx.drawImage(tmp, 0, 0, w, h);
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = "#444";
+  ctx.font = Math.max(14, w * 0.025) + "px Arial";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "bottom";
+  ctx.fillText("BeadItNow", w - 6, h - 4);
+  ctx.globalAlpha = 1;
   canvas.toBlob(function(blob) {
     tryShareOrDownload(blob, "pixel-art.png", "image/png");
   }, "image/png");
@@ -173,7 +160,9 @@ function exportPDF(pixelData, colorMap, brand) {
   // Use share on mobile, save on desktop
   pdf.setFontSize(6);
   pdf.setTextColor(180);
-  try { pdf.setGState(new (window.jspdf.GState)({opacity: 0.3})); } catch(_){}
+  try { pdf.setGState(new (window.jspdf.GState)({opacity: 0.2})); } catch(_){}
+  pdf.setFontSize(10);
+  pdf.setTextColor(180);
   pdf.text("BeadItNow", pageW - margin, pageH - margin, { align: "right" });
   try { pdf.setGState(new (window.jspdf.GState)({opacity: 1})); } catch(_){}
   

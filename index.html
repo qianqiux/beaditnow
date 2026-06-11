@@ -69,6 +69,9 @@
                     <option value="hama">Hama 5mm midi (93色)</option>
                     <option value="mard">Mard 221 色</option>
                   </select></div>
+                <div class="control-group"><label>色彩增强 <span id="saturateVal">1.4</span>x</label>
+            <input type="range" id="saturateSlider" min="1.0" max="2.0" step="0.1" value="1.4" style="width:100%"></div>
+
                 <button class="btn btn-primary" id="generateBtn" disabled>
                   <span class="btn-text">生成像素画</span>
                   <span class="btn-loading hidden"><svg class="spinner" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>处理中...</span>
@@ -117,8 +120,7 @@
                     <button class="tool-btn" id="zoomIn" title="放大">+</button>
                     <div class="tool-divider"></div>
                     <span class="edit-hint">画笔[B] 填充[F] 橡皮[E] 左键涂色 右键取色 空格拖拽 Ctrl+Z撤销</span>
-                    <button class="btn btn-sm btn-ghost" id="undoBtn">撤销</button>
-                  </div>
+                    <button class="btn btn-sm btn-ghost" id="undoBtn">撤销</button></div>
                   <div class="status-bar" id="statusBar">
                     <span class="status-item" id="statusTool"></span>
                     <span class="status-sep">|</span>
