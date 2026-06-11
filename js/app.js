@@ -227,23 +227,30 @@ void function() {
   function renderPreview(vd) {
     var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600) / Math.max(vd.width, vd.height)));
     if (window.innerWidth <= 500) scale = Math.max(1, Math.floor(scale * 0.55));
-    var canvas = renderPixelCanvas(vd, scale, true);
-    canvas.id = "pixelCanvas";
-    canvas.style.position = "absolute";
-    canvas.style.imageRendering = "pixelated";
-    canvas.style.cursor = currentTool === "eraser" ? "cell" : "crosshair";
-    canvas.style.width = vd.width * scale + "px";
-    canvas.style.height = vd.height * scale + "px";
-    // Center canvas in wrapper and apply pan offset
     centerX = Math.max(0, (pixelCanvasWrapper.clientWidth - vd.width * scale) / 2);
     centerY = Math.max(0, (pixelCanvasWrapper.clientHeight - vd.height * scale) / 2);
-    canvas.style.left = centerX + "px";
-    canvas.style.top = centerY + "px";
-    var old = pixelCanvasWrapper.querySelector("canvas");
-    if (old) old.remove();
-    pixelCanvasWrapper.appendChild(canvas);
+    var exist = pixelCanvasWrapper.querySelector("canvas");
+    if (exist && exist.width === vd.width && exist.height === vd.height && exist._scale === scale) {
+      // 复用已有 canvas：只更新像素内容
+      var tmp = renderPixelCanvas(vd, scale, true);
+      exist.getContext("2d").clearRect(0, 0, exist.width, exist.height);
+      exist.getContext("2d").drawImage(tmp, 0, 0);
+    } else {
+      if (exist) exist.remove();
+      var canvas = renderPixelCanvas(vd, scale, true);
+      canvas.id = "pixelCanvas";
+      canvas.style.position = "absolute";
+      canvas.style.imageRendering = "pixelated";
+      canvas.style.cursor = currentTool === "eraser" ? "cell" : "crosshair";
+      canvas.style.width = vd.width * scale + "px";
+      canvas.style.height = vd.height * scale + "px";
+      canvas.style.left = centerX + "px";
+      canvas.style.top = centerY + "px";
+      canvas._scale = scale;
+      pixelCanvasWrapper.appendChild(canvas);
+      bindCanvasEvents(canvas, vd, scale);
+    }
     applyPan();
-    bindCanvasEvents(canvas, vd, scale);
   }
 
   function renderUsedPalette(vd) {
