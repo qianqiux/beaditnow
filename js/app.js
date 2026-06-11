@@ -419,13 +419,6 @@ void function() {
   function applyPan() {
     var cnv = pixelCanvasWrapper.querySelector("canvas");
     if (!cnv) return;
-    var cw = cnv.offsetWidth, ch = cnv.offsetHeight;
-    var ww = pixelCanvasWrapper.clientWidth, wh = pixelCanvasWrapper.clientHeight;
-    // 至少留 30px 画布在视图内
-    var maxOx = Math.max(30, (cw - ww) / 2 + 30);
-    var maxOy = Math.max(30, (ch - wh) / 2 + 30);
-    panOffsetX = Math.max(-maxOx, Math.min(maxOx, panOffsetX));
-    panOffsetY = Math.max(-maxOy, Math.min(maxOy, panOffsetY));
     cnv.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)";
   }
   var resetBtn = document.getElementById("resetViewBtn");
