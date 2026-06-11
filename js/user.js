@@ -155,28 +155,31 @@ function showEl(el) { if (el) { el.classList.remove('hidden'); el.style.display 
 function hideEl(el) { if (el) { el.classList.add('hidden'); el.style.display = 'none'; } }
 function updateUserUI() {
   var us = document.getElementById('userStatus');
-  if (us) {
-    if (currentUser) {
-      var em = currentUser.email || '';
-      us.innerHTML = '<span class="user-avatar">' + em.charAt(0).toUpperCase() + '</span><span class="user-email">' + em.replace(/</g,'&lt;') + '</span>';
-      us.classList.remove('hidden');
-      us.style.display = '';
-    } else {
-      us.innerHTML = '';
-      us.classList.add('hidden');
-      us.style.display = 'none';
-    }
-  }
+  var ud = document.getElementById('userDropdown');
+  var de = document.getElementById('dropdownEmail');
   if (currentUser) {
-    hideEl(document.getElementById('loginBtn'));
-    showEl(document.getElementById('logoutBtn'));
-    showEl(document.getElementById('saveBtn'));
-    showEl(document.getElementById('loadBtn'));
+    var em = currentUser.email || '';
+    if (window.innerWidth <= 500 && us) {
+      us.innerHTML = '<span class="user-avatar" id="avatarBtn" style="cursor:pointer">' + em.charAt(0).toUpperCase() + '</span>';
+      us.classList.remove('hidden'); us.style.display = '';
+      var ab = document.getElementById('avatarBtn');
+      if (ab) { ab.onclick = function(e){ e.stopPropagation(); var d=document.getElementById('userDropdown'); if(d)d.classList.toggle('hidden'); }; }
+    } else if (us) {
+      us.innerHTML = '<span class="user-avatar">' + em.charAt(0).toUpperCase() + '</span><span class="user-email">' + em.replace(/</g,'&lt;') + '</span>';
+      us.classList.remove('hidden'); us.style.display = '';
+    }
+    if (de) de.textContent = em;
+    // Show/hide buttons
+    var lg = document.getElementById('loginBtn'); if (lg) { lg.classList.add('hidden'); lg.style.display = 'none'; }
+    var lo = document.getElementById('logoutBtn'); if (lo) { lo.classList.remove('hidden'); lo.style.display = ''; }
+    var sb = document.getElementById('saveBtn'); if (sb) { sb.classList.remove('hidden'); sb.style.display = ''; }
+    var lb = document.getElementById('loadBtn'); if (lb) { lb.classList.remove('hidden'); lb.style.display = ''; }
   } else {
-    showEl(document.getElementById('loginBtn'));
-    hideEl(document.getElementById('logoutBtn'));
-    hideEl(document.getElementById('saveBtn'));
-    hideEl(document.getElementById('loadBtn'));
+    if (us) { us.innerHTML = ''; us.classList.add('hidden'); us.style.display = 'none'; }
+    var lg = document.getElementById('loginBtn'); if (lg) { lg.classList.remove('hidden'); lg.style.display = ''; }
+    var lo = document.getElementById('logoutBtn'); if (lo) { lo.classList.add('hidden'); lo.style.display = 'none'; }
+    var sb = document.getElementById('saveBtn'); if (sb) { sb.classList.add('hidden'); sb.style.display = 'none'; }
+    var lb = document.getElementById('loadBtn'); if (lb) { lb.classList.add('hidden'); lb.style.display = 'none'; }
   }
 }
 
@@ -263,6 +266,9 @@ function confirmDeleteNo() {
   if (m) m.style.display = 'none';
   if (_delResolve) { _delResolve(false); _delResolve = null; }
 }
+
+// 全局点击关闭下拉菜单
+document.addEventListener("click",function(){ var d=document.getElementById("userDropdown"); if(d)d.classList.add("hidden"); },{passive:true});
 
 // Auto-restore session
 setTimeout(function() { restoreSession(); }, 300);

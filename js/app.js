@@ -607,5 +607,6 @@ document.addEventListener("wheel", function(e) {
   window._cloneImageData = function(v) { return cloneImageData(v); };
   window._renderAll = function() { renderAll(); };
   window._switchToPage = function(i) { switchToPage(i); };
+  window._updateUserUI = updateUserUI;
 
 }();
