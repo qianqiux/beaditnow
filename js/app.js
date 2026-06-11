@@ -237,8 +237,9 @@ void function() {
     // Center canvas in wrapper and apply pan offset
     centerX = Math.max(0, (pixelCanvasWrapper.clientWidth - vd.width * scale) / 2);
     centerY = Math.max(0, (pixelCanvasWrapper.clientHeight - vd.height * scale) / 2);
-    canvas.style.left = (centerX + panOffsetX) + "px";
-    canvas.style.top = (centerY + panOffsetY) + "px";
+    canvas.style.left = centerX + "px";
+    canvas.style.top = centerY + "px";
+    canvas.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)";
     var old = pixelCanvasWrapper.querySelector("canvas");
     if (old) old.remove();
     pixelCanvasWrapper.appendChild(canvas);
@@ -352,7 +353,7 @@ void function() {
         panOffsetX = cx - panStartX;
         panOffsetY = cy - panStartY;
         var cnv = pixelCanvasWrapper.querySelector("canvas");
-        if (cnv) { cnv.style.left = (centerX + panOffsetX) + "px"; cnv.style.top = (centerY + panOffsetY) + "px"; }
+        if (cnv) { cnv.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)"; }
         return;
       }
       if (!isDrawing) return; e.preventDefault(); var coord = getPixel(e); if (!coord) return; if (paintPixel(coord.px, coord.py)) renderAll(); }
@@ -376,6 +377,7 @@ void function() {
       _tx=e.touches[0].clientX; _ty=e.touches[0].clientY; _tm=false;
     }, { passive: true });
     canvas.addEventListener("touchmove", function(e) {
+      if (_pageLocked) e.preventDefault();
       if (e.touches.length >= 2) return;
       var cx=e.touches[0].clientX, cy=e.touches[0].clientY;
       var dx=cx-_tx, dy=cy-_ty;
@@ -415,10 +417,14 @@ void function() {
   var lockBtn = document.getElementById("lockBtn");
   if (lockBtn) {
     if (window.innerWidth <= 500) lockBtn.style.display = "";
+    var _lockHandler = function(e) { if (_pageLocked) e.preventDefault(); };
     lockBtn.addEventListener("click", function() {
       _pageLocked = !_pageLocked;
       lockBtn.textContent = _pageLocked ? "🔒" : "🔓";
       lockBtn.title = _pageLocked ? "页面已锁定，点击解锁" : "锁定页面，防止误触翻页";
+      // 锁定后阻止全文滚动
+      if (_pageLocked) { document.addEventListener("touchmove", _lockHandler, { passive: false }); }
+      else { document.removeEventListener("touchmove", _lockHandler); }
     });
   }
 
