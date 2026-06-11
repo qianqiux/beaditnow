@@ -428,14 +428,13 @@ void function() {
   var lockBtn = document.getElementById("lockBtn");
   if (lockBtn) {
     if (window.innerWidth <= 500) { lockBtn.style.display = ""; if(resetBtn) resetBtn.style.display = ""; }
-    var _lockHandler = function(e) { if (_pageLocked) e.preventDefault(); };
     lockBtn.addEventListener("click", function() {
       _pageLocked = !_pageLocked;
       lockBtn.textContent = _pageLocked ? "🔒" : "🔓";
       lockBtn.title = _pageLocked ? "页面已锁定，点击解锁" : "锁定页面，防止误触翻页";
-      // 锁定后阻止全文滚动
-      if (_pageLocked) { document.addEventListener("touchmove", _lockHandler, { passive: false }); }
-      else { document.removeEventListener("touchmove", _lockHandler); }
+      // 锁定后只阻止画布区域的滚动，色盘仍可滑动
+      if (_pageLocked) { pixelCanvasWrapper.style.touchAction = "none"; }
+      else { pixelCanvasWrapper.style.touchAction = ""; }
     });
   }
 

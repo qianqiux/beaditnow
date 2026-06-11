@@ -13,6 +13,13 @@
       <h1 style="margin:0">BeadItNow</h1>
       <div class="header-actions">
           <span id="userStatus" class="hidden"></span>
+          <div id="userDropdown" class="user-dropdown hidden">
+            <div class="user-dropdown-header"><span id="dropdownEmail"></span></div>
+            <div class="user-dropdown-item" onclick="showSaveDialog()">保存作品</div>
+            <div class="user-dropdown-item" onclick="showLoadDialog()">我的作品</div>
+            <div class="user-dropdown-divider"></div>
+            <div class="user-dropdown-item user-dropdown-exit" onclick="signOut()">退出登录</div>
+          </div>
           <button class="btn btn-sm btn-ghost" id="loginBtn" onclick="showLoginModal()">登录 / 注册</button>
           <button class="btn btn-sm btn-ghost hidden" id="logoutBtn" onclick="signOut()">退出</button>
           <button class="btn btn-sm btn-ghost hidden" id="saveBtn" onclick="showSaveDialog()">保存</button>
