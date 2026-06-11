@@ -316,6 +316,7 @@ void function() {
       editImageData.data[idx] = tr; editImageData.data[idx+1] = tg; editImageData.data[idx+2] = tb; editImageData.data[idx+3] = 255;
       return true;
     }function onStart(e) {
+      if (_touchFired) { _touchFired=false; return; }
       if (e.button === 2) return;
       // Middle mouse button or Space + left drag = pan
       if (e.button === 1) {
@@ -371,8 +372,9 @@ void function() {
     canvas.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onEnd);
     // ---- 手机触控：单指拖拽 = 平移画布，点击 = 画像素，双指捏合 = 缩放 ----
-    var _tx=0,_ty=0,_tm=false;
+    var _tx=0,_ty=0,_tm=false,_touchFired=false;
     canvas.addEventListener("touchstart", function(e) {
+      _touchFired=true;
       if (e.touches.length >= 2) return;
       _tx=e.touches[0].clientX; _ty=e.touches[0].clientY; _tm=false;
     }, { passive: true });
