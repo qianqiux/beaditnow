@@ -239,10 +239,10 @@ void function() {
     centerY = Math.max(0, (pixelCanvasWrapper.clientHeight - vd.height * scale) / 2);
     canvas.style.left = centerX + "px";
     canvas.style.top = centerY + "px";
-    canvas.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)";
     var old = pixelCanvasWrapper.querySelector("canvas");
     if (old) old.remove();
     pixelCanvasWrapper.appendChild(canvas);
+    applyPan();
     bindCanvasEvents(canvas, vd, scale);
   }
 
@@ -413,10 +413,26 @@ void function() {
     canvas.addEventListener("mouseleave", function() { clearStatusPos(); });
   }
 
-  // 锁定按钮（手机端显示，防止翻页）
+  // 平移边界限制 + 复位
+  function applyPan() {
+    var cnv = pixelCanvasWrapper.querySelector("canvas");
+    if (!cnv) return;
+    var cw = cnv.offsetWidth, ch = cnv.offsetHeight;
+    var ww = pixelCanvasWrapper.clientWidth, wh = pixelCanvasWrapper.clientHeight;
+    // 至少留 30px 画布在视图内
+    var maxOx = Math.max(30, (cw - ww) / 2 + 30);
+    var maxOy = Math.max(30, (ch - wh) / 2 + 30);
+    panOffsetX = Math.max(-maxOx, Math.min(maxOx, panOffsetX));
+    panOffsetY = Math.max(-maxOy, Math.min(maxOy, panOffsetY));
+    cnv.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)";
+  }
+  var resetBtn = document.getElementById("resetViewBtn");
+  if (resetBtn) resetBtn.addEventListener("click", function() { panOffsetX=0; panOffsetY=0; if (editImageData) renderAll(); });
+
+  // 锁定按钮
   var lockBtn = document.getElementById("lockBtn");
   if (lockBtn) {
-    if (window.innerWidth <= 500) lockBtn.style.display = "";
+    if (window.innerWidth <= 500) { lockBtn.style.display = ""; if(resetBtn) resetBtn.style.display = ""; }
     var _lockHandler = function(e) { if (_pageLocked) e.preventDefault(); };
     lockBtn.addEventListener("click", function() {
       _pageLocked = !_pageLocked;
