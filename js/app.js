@@ -411,6 +411,17 @@ void function() {
     canvas.addEventListener("mouseleave", function() { clearStatusPos(); });
   }
 
+  // 锁定按钮（手机端显示，防止翻页）
+  var lockBtn = document.getElementById("lockBtn");
+  if (lockBtn) {
+    if (window.innerWidth <= 500) lockBtn.style.display = "";
+    lockBtn.addEventListener("click", function() {
+      _pageLocked = !_pageLocked;
+      lockBtn.textContent = _pageLocked ? "🔒" : "🔓";
+      lockBtn.title = _pageLocked ? "页面已锁定，点击解锁" : "锁定页面，防止误触翻页";
+    });
+  }
+
   undoBtn.addEventListener("click", function() {
     if (undoStack.length > 1) { undoStack.pop(); editImageData = cloneImageData(undoStack[undoStack.length - 1].data); renderAll(); }
   });
@@ -489,12 +500,12 @@ void function() {
 // ===== Page Switch =====
 var _pageIdx = 0;
 var _pageAnim = false;
+var _pageLocked = false;
 var _touchY = 0;
 
 document.addEventListener("touchstart", function(e) { _touchY = e.touches[0].clientY; }, { passive: true });
 document.addEventListener("touchend", function(e) {
-  if (_pageAnim) return;
-  // Only enable touch page switching on mobile (<=500px)
+  if (_pageAnim || _pageLocked) return;
   if (window.innerWidth > 500) return;
   // Upload page: swipe down -> editor
   if (_pageIdx === 0) {
@@ -527,6 +538,7 @@ function switchToPage(idx) {
 }
 
 document.addEventListener("wheel", function(e) {
+  if (_pageLocked) return;
   if (_pageIdx === 0) {
     // Upload page: scroll down → editor
     if (e.deltaY > 0 && !_pageAnim && originalImgData) {
