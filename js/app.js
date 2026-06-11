@@ -48,6 +48,10 @@ void function() {
   const statusZoom = $("statusZoom");
 
   let currentBrand = 'artkal-5mm';
+  // === 联盟导购链接（修改这里的 URL 为你自己的淘宝/京东推广链接）===
+  var AFFILIATE_URL = 'https://s.click.taobao.com/YOUR_ID_HERE';
+  var AFFILIATE_TEXT = '在淘宝购买这些颜色';
+  // =============================================
   let originalImgData = null;
   let originalFileSize = 0;
   let editImageData = null;
@@ -245,7 +249,9 @@ void function() {
     var ct = getColorTable(currentBrand);
     var cm = buildColorStats(vd, ct);
     paletteDiv.innerHTML = "";
+    var total = 0;
     for (var ei = 0; ei < cm.length; ei++) {
+      total += cm[ei].count;
       var c = cm[ei].bead;
       var div = document.createElement("div"); div.className = "palette-item";
       var sw = document.createElement("div"); sw.className = "palette-swatch"; sw.style.background = "rgb(" + c.r + "," + c.g + "," + c.b + ")";
@@ -253,6 +259,11 @@ void function() {
       lb.innerHTML = (showBeadMapping ? "#" + c.id + " " + c.name : c.r + "," + c.g + "," + c.b) + "<br>x" + cm[ei].count;
       div.appendChild(sw); div.appendChild(lb); paletteDiv.appendChild(div);
     }
+    // 更新右侧购买面板
+    var tb = document.getElementById("totalBeads");
+    var pb = document.getElementById("purchaseBtn");
+    if (tb) tb.textContent = total;
+    if (pb) pb.href = AFFILIATE_URL;
   }
 
   function renderBeadPalette() {
@@ -358,38 +369,54 @@ void function() {
     canvas.addEventListener("mousedown", onStart);
     canvas.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onEnd);
-    canvas.addEventListener("touchstart", onStart, { passive: false });
-    canvas.addEventListener("touchmove", onMove, { passive: false });
-    canvas.addEventListener("touchend", onEnd);
-    // canvas zoom handled by document wheel listener
-    canvas.addEventListener("mousemove", function(e) { var c = getPixel(e); if (c) setStatusPos(c.px, c.py); });
-    canvas.addEventListener("mouseleave", function() { clearStatusPos(); });
-    canvas.addEventListener("touchcancel", onEnd);
-    // Wrapper-level 2-finger pan for mobile (catches fingers on different elements)
-    pixelCanvasWrapper.addEventListener("touchstart", function pe(e) {
+    // ---- 手机触控：单指拖拽 = 平移画布，点击 = 画像素，双指捏合 = 缩放 ----
+    var _tx=0,_ty=0,_tm=false,_pd=0;
+    canvas.addEventListener("touchstart", function(e) {
+      if (e.touches.length >= 2) {
+        _pd = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+        isPanning = false; return;
+      }
+      _tx=e.touches[0].clientX; _ty=e.touches[0].clientY; _tm=false;
+    }, { passive: true });
+    canvas.addEventListener("touchmove", function(e) {
       if (e.touches.length >= 2) {
         e.preventDefault();
-        isPanning = true;
-        panStartX = e.touches[0].clientX - panOffsetX;
-        panStartY = e.touches[0].clientY - panOffsetY;
-        pixelCanvasWrapper.classList.add("panning");
+        var d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+        if (_pd > 0) { if (d > _pd*1.08) zoomIn(); else if (d < _pd*0.92) zoomOut(); }
+        _pd = d; return;
+      }
+      var cx=e.touches[0].clientX, cy=e.touches[0].clientY;
+      var dx=cx-_tx, dy=cy-_ty;
+      if (dx*dx+dy*dy > 16) {
+        if (!_tm) { _tm=true; isPanning=true; panStartX=cx-panOffsetX; panStartY=cy-panOffsetY; pixelCanvasWrapper.classList.add("panning"); }
+        panOffsetX=cx-panStartX; panOffsetY=cy-panStartY;
+        var cn=pixelCanvasWrapper.querySelector("canvas");
+        if (cn) { cn.style.left=(centerX+panOffsetX)+"px"; cn.style.top=(centerY+panOffsetY)+"px"; }
       }
     }, { passive: false });
-    pixelCanvasWrapper.addEventListener("touchmove", function pe(e) {
-      if (isPanning) {
-        e.preventDefault();
-        panOffsetX = e.touches[0].clientX - panStartX;
-        panOffsetY = e.touches[0].clientY - panStartY;
-        var cnv = pixelCanvasWrapper.querySelector("canvas");
-        if (cnv) { cnv.style.left = (centerX + panOffsetX) + "px"; cnv.style.top = (centerY + panOffsetY) + "px"; }
+    canvas.addEventListener("touchend", function(e) {
+      if (_tm) { isPanning=false; pixelCanvasWrapper.classList.remove("panning"); }
+      else {
+        // 点击(轻触) = 画像素
+        if (e.changedTouches) {
+          var ce = e.changedTouches[0];
+          var rect = canvas.getBoundingClientRect();
+          var mx = ce.clientX - rect.left, my = ce.clientY - rect.top;
+          var px = Math.floor(mx * w / rect.width), py = Math.floor(my * h / rect.height);
+          if (px >= 0 && px < w && py >= 0 && py < h) {
+            undoStack.push({data:cloneImageData(editImageData)});
+            if (undoStack.length>30) undoStack.shift();
+            if (currentTool==="fill" && selectedBeadColor) {
+              var vd2=getViewData(); if (vd2&&floodFill(editImageData,vd2,px,py,selectedBeadColor)) renderAll();
+            } else { if (paintPixel(px,py)) renderAll(); }
+          }
+        }
       }
-    }, { passive: false });
-    pixelCanvasWrapper.addEventListener("touchend", function pe(e) {
-      if (isPanning && e.touches.length < 2) {
-        isPanning = false;
-        pixelCanvasWrapper.classList.remove("panning");
-      }
-    });
+    }, { passive: true });
+    canvas.addEventListener("touchcancel", function() { isPanning=false; pixelCanvasWrapper.classList.remove("panning"); });
+    // ---- 手机触控结束 ----
+    canvas.addEventListener("mousemove", function(e) { var c = getPixel(e); if (c) setStatusPos(c.px, c.py); });
+    canvas.addEventListener("mouseleave", function() { clearStatusPos(); });
   }
 
   undoBtn.addEventListener("click", function() {
