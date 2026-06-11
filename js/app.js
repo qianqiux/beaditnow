@@ -227,30 +227,24 @@ void function() {
   function renderPreview(vd) {
     var scale = currentZoom > 0 ? currentZoom : Math.max(1, Math.floor(Math.min(pixelCanvasWrapper.clientWidth - 24, pixelCanvasWrapper.clientHeight - 24, 600) / Math.max(vd.width, vd.height)));
     if (window.innerWidth <= 500) scale = Math.max(1, Math.floor(scale * 0.55));
-    centerX = Math.max(0, (pixelCanvasWrapper.clientWidth - vd.width * scale) / 2);
-    centerY = Math.max(0, (pixelCanvasWrapper.clientHeight - vd.height * scale) / 2);
-    var exist = pixelCanvasWrapper.querySelector("canvas");
-    if (exist && exist.width === vd.width && exist.height === vd.height && exist._scale === scale) {
-      // 复用已有 canvas：只更新像素内容
-      var tmp = renderPixelCanvas(vd, scale, true);
-      exist.getContext("2d").clearRect(0, 0, exist.width, exist.height);
-      exist.getContext("2d").drawImage(tmp, 0, 0);
-    } else {
-      if (exist) exist.remove();
-      var canvas = renderPixelCanvas(vd, scale, true);
-      canvas.id = "pixelCanvas";
-      canvas.style.position = "absolute";
-      canvas.style.imageRendering = "pixelated";
-      canvas.style.cursor = currentTool === "eraser" ? "cell" : "crosshair";
-      canvas.style.width = vd.width * scale + "px";
-      canvas.style.height = vd.height * scale + "px";
-      canvas.style.left = centerX + "px";
-      canvas.style.top = centerY + "px";
-      canvas._scale = scale;
-      pixelCanvasWrapper.appendChild(canvas);
-      bindCanvasEvents(canvas, vd, scale);
+    if (!pixelCanvasWrapper.querySelector("canvas")) {
+      centerX = Math.max(0, (pixelCanvasWrapper.clientWidth - vd.width * scale) / 2);
+      centerY = Math.max(0, (pixelCanvasWrapper.clientHeight - vd.height * scale) / 2);
     }
-    applyPan();
+    // 用 JS 变量 leftPos/topPos 存储 canvas 位置，不依赖 DOM.style.left 读取
+    var canvas = renderPixelCanvas(vd, scale, true);
+    canvas.id = "pixelCanvas";
+    canvas.style.position = "absolute";
+    canvas.style.imageRendering = "pixelated";
+    canvas.style.cursor = currentTool === "eraser" ? "cell" : "crosshair";
+    canvas.style.width = vd.width * scale + "px";
+    canvas.style.height = vd.height * scale + "px";
+    canvas.style.left = (centerX + panOffsetX) + "px";
+    canvas.style.top = (centerY + panOffsetY) + "px";
+    var old = pixelCanvasWrapper.querySelector("canvas");
+    if (old) old.remove();
+    pixelCanvasWrapper.appendChild(canvas);
+    bindCanvasEvents(canvas, vd, scale);
   }
 
   function renderUsedPalette(vd) {
@@ -323,7 +317,7 @@ void function() {
       editImageData.data[idx] = tr; editImageData.data[idx+1] = tg; editImageData.data[idx+2] = tb; editImageData.data[idx+3] = 255;
       return true;
     }function onStart(e) {
-      if (_touchFired) { _touchFired=false; return; }
+      if (_touchFired) { return; }
       if (e.button === 2) return;
       // Middle mouse button or Space + left drag = pan
       if (e.button === 1) {
@@ -361,7 +355,7 @@ void function() {
         panOffsetX = cx - panStartX;
         panOffsetY = cy - panStartY;
         var cnv = pixelCanvasWrapper.querySelector("canvas");
-        if (cnv) { cnv.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)"; }
+        if (cnv) { cnv.style.left = (centerX + panOffsetX) + "px"; cnv.style.top = (centerY + panOffsetY) + "px"; }
         return;
       }
       if (!isDrawing) return; e.preventDefault(); var coord = getPixel(e); if (!coord) return; if (paintPixel(coord.px, coord.py)) renderAll(); }
@@ -400,7 +394,6 @@ void function() {
     canvas.addEventListener("touchend", function(e) {
       if (_tm) { isPanning=false; pixelCanvasWrapper.classList.remove("panning"); }
       else {
-        // 点击(轻触) = 画像素
         if (e.changedTouches) {
           var ce = e.changedTouches[0];
           var rect = canvas.getBoundingClientRect();
@@ -415,6 +408,10 @@ void function() {
           }
         }
       }
+      // 锁定 _touchFired 500ms 防止合成 mouse 事件干扰
+      _touchFired = true;
+      clearTimeout(window._tfTimer);
+      window._tfTimer = setTimeout(function() { _touchFired = false; }, 500);
     }, { passive: true });
     canvas.addEventListener("touchcancel", function() { isPanning=false; pixelCanvasWrapper.classList.remove("panning"); });
     // ---- 手机触控结束 ----
@@ -423,11 +420,7 @@ void function() {
   }
 
   // 平移边界限制 + 复位
-  function applyPan() {
-    var cnv = pixelCanvasWrapper.querySelector("canvas");
-    if (!cnv) return;
-    cnv.style.transform = "translate(" + panOffsetX + "px," + panOffsetY + "px)";
-  }
+  // panning is handled by directly setting left/top on canvas
   var resetBtn = document.getElementById("resetViewBtn");
   if (resetBtn) resetBtn.addEventListener("click", function() { panOffsetX=0; panOffsetY=0; if (editImageData) renderAll(); });
 
