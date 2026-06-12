@@ -47,9 +47,9 @@ function exportPNG(pixelData) {
     }
   }
   // 水印
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = "#333";
-  ctx.font = Math.max(16, w * 0.03) + "px Arial";
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = "#222";
+  ctx.font = Math.max(20, w * 0.04) + "px Arial";
   ctx.textAlign = "right";
   ctx.textBaseline = "bottom";
   ctx.fillText("BeadItNow", w - 8, h - 6);
@@ -172,6 +172,8 @@ function exportPDF(pixelData, colorMap, brand) {
   pdf.setTextColor(180);
   pdf.setFontSize(8);
   pdf.setTextColor(160,160,160);
+  pdf.setFontSize(10);
+  pdf.setTextColor(140,140,140);
   pdf.text("BeadItNow", pageW - margin, pageH - margin, { align: "right" });
   
   var pdfBlob = pdf.output("blob");
