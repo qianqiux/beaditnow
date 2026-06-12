@@ -48,10 +48,6 @@ void function() {
   const statusZoom = $("statusZoom");
 
   let currentBrand = 'artkal-5mm';
-  // === 联盟导购链接（修改这里的 URL 为你自己的淘宝/京东推广链接）===
-  var AFFILIATE_URL = 'https://s.click.taobao.com/YOUR_ID_HERE';
-  var AFFILIATE_TEXT = '在淘宝购买这些颜色';
-  // =============================================
   let originalImgData = null;
   let originalFileSize = 0;
   let editImageData = null;
@@ -261,11 +257,7 @@ void function() {
       lb.innerHTML = (showBeadMapping ? "#" + c.id + " " + c.name : c.r + "," + c.g + "," + c.b) + "<br>x" + cm[ei].count;
       div.appendChild(sw); div.appendChild(lb); paletteDiv.appendChild(div);
     }
-    // 更新右侧购买面板
-    var tb = document.getElementById("totalBeads");
-    var pb = document.getElementById("purchaseBtn");
-    if (tb) tb.textContent = total;
-    if (pb) pb.href = AFFILIATE_URL;
+
   }
 
   function renderBeadPalette() {
@@ -523,8 +515,9 @@ document.addEventListener("touchstart", function(e) { _touchY = e.touches[0].cli
 document.addEventListener("touchend", function(e) {
   if (_pageAnim || _pageLocked) return;
   if (window.innerWidth > 500) return;
-  // Upload page: swipe down -> editor
+  // Upload page: swipe down -> editor (only if pixel art generated)
   if (_pageIdx === 0) {
+    if (!editImageData) return;
     var dy = _touchY - e.changedTouches[0].clientY;
     if (dy > 30) {
       switchToPage(1);
@@ -557,7 +550,7 @@ document.addEventListener("wheel", function(e) {
   if (_pageLocked) return;
   if (_pageIdx === 0) {
     // Upload page: scroll down → editor
-    if (e.deltaY > 0 && !_pageAnim && originalImgData) {
+    if (e.deltaY > 0 && !_pageAnim && editImageData) {
       _pageAnim = true;
       _pageIdx = 1;
       var stack = document.getElementById("pageStack");
