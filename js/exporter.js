@@ -25,25 +25,29 @@ function fallbackDownload(blob, fileName) {
  * @param {ImageData} pixelData
  */
 function exportPNG(pixelData) {
-  var scale = Math.max(1, Math.ceil(200 / Math.max(pixelData.width, pixelData.height)));
+  // 放大到至少 500px，保证清晰可见
+  var scale = Math.max(1, Math.ceil(500 / Math.max(pixelData.width, pixelData.height)));
   var w = pixelData.width * scale, h = pixelData.height * scale;
   var canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
   var ctx = canvas.getContext("2d");
+  // 浏览器兼容：禁用抗锯齿保持像素边缘锐利
   ctx.imageSmoothingEnabled = false;
-  var tmp = document.createElement("canvas");
-  tmp.width = pixelData.width;
-  tmp.height = pixelData.height;
-  tmp.getContext("2d").putImageData(pixelData, 0, 0);
-  ctx.drawImage(tmp, 0, 0, w, h);
-  ctx.globalAlpha = 0.25;
-  ctx.fillStyle = "#444";
-  ctx.font = Math.max(14, w * 0.025) + "px Arial";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "bottom";
-  ctx.fillText("BeadItNow", w - 6, h - 4);
-  ctx.globalAlpha = 1;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.webkitImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
+  // 逐个像素绘制，保证100%清晰
+  var data = pixelData.data;
+  for (var y = 0; y < pixelData.height; y++) {
+    for (var x = 0; x < pixelData.width; x++) {
+      var idx = (y * pixelData.width + x) * 4;
+      ctx.fillStyle = "rgb(" + data[idx] + "," + data[idx+1] + "," + data[idx+2] + ")";
+      ctx.fillRect(x * scale, y * scale, scale, scale);
+    }
+  }
+  // 水印
+
   canvas.toBlob(function(blob) {
     tryShareOrDownload(blob, "pixel-art.png", "image/png");
   }, "image/png");
@@ -160,11 +164,15 @@ function exportPDF(pixelData, colorMap, brand) {
   // Use share on mobile, save on desktop
   pdf.setFontSize(6);
   pdf.setTextColor(180);
-  try { pdf.setGState(new (window.jspdf.GState)({opacity: 0.2})); } catch(_){}
-  pdf.setFontSize(10);
-  pdf.setTextColor(180);
-  pdf.text("BeadItNow", pageW - margin, pageH - margin, { align: "right" });
-  try { pdf.setGState(new (window.jspdf.GState)({opacity: 1})); } catch(_){}
+  pdf.setFontSize(8);
+  pdf.setTextColor(160,160,160);
+  // 水印
+  pdf.setDrawColor(180,180,180);
+  pdf.setFillColor(245,245,245);
+  pdf.rect(10, pageH - 12, pageW - 20, 8, "FD");
+  pdf.setFontSize(9);
+  pdf.setTextColor(150,150,150);
+  pdf.text("BeadItNow - 马上变豆 拼豆素材生成器", pageW / 2, pageH - 6, { align: "center" });
   
   var pdfBlob = pdf.output("blob");
   tryShareOrDownload(pdfBlob, "perler-beads-chart.pdf", "application/pdf");

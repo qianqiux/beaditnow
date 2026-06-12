@@ -166,9 +166,13 @@ function exportPDF(pixelData, colorMap, brand) {
   pdf.setTextColor(180);
   pdf.setFontSize(8);
   pdf.setTextColor(160,160,160);
-  pdf.setFontSize(14);
-  pdf.setTextColor(120,120,120);
-  pdf.text("BeadItNow", pageW / 2, pageH - margin, { align: "center" });
+  // 水印
+  pdf.setDrawColor(180,180,180);
+  pdf.setFillColor(245,245,245);
+  pdf.rect(10, pageH - 12, pageW - 20, 8, "FD");
+  pdf.setFontSize(9);
+  pdf.setTextColor(150,150,150);
+  pdf.text("BeadItNow - 马上变豆 拼豆素材生成器", pageW / 2, pageH - 6, { align: "center" });
   
   var pdfBlob = pdf.output("blob");
   tryShareOrDownload(pdfBlob, "perler-beads-chart.pdf", "application/pdf");
